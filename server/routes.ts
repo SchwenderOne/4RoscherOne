@@ -170,7 +170,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const transaction = await storage.createTransaction(validatedData);
       res.status(201).json(transaction);
     } catch (error) {
-      res.status(400).json({ error: "Invalid data" });
+      console.error("Transaction creation error:", error);
+      res.status(400).json({ error: "Invalid data", details: error.message });
     }
   });
 

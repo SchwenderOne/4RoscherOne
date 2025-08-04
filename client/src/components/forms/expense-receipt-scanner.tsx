@@ -487,12 +487,18 @@ export function ExpenseReceiptScanner({
                                   headers: { 'Content-Type': 'application/json' },
                                   body: JSON.stringify({
                                     description,
-                                    amount: amount.toString(),
+                                    amount: amount.toFixed(2), // Ensure decimal format
                                     paidById: paidBy,
-                                    splitBetween
+                                    splitBetween,
+                                    category: 'food' // Required category field
                                   })
                                 });
-                                return response.json();
+                                const result = await response.json();
+                                if (!response.ok) {
+                                  console.error('Transaction creation failed:', result);
+                                  throw new Error(result.details || result.error || 'Failed to create transaction');
+                                }
+                                return result;
                               };
 
                               const currentUser = getCurrentUser();
