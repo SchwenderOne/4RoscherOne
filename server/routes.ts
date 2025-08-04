@@ -1,9 +1,71 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import multer from "multer";
+import { PDFExtract } from "pdf.js-extract";
 import { storage } from "./storage";
 import { insertShoppingItemSchema, insertTransactionSchema, insertActivitySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  
+  // Set up multer for file uploads
+  const upload = multer({ 
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  });
+
+  // Receipt processing endpoint
+  app.post("/api/process-receipt", upload.single('receipt'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      if (req.file.mimetype !== 'application/pdf') {
+        return res.status(400).json({ error: "Only PDF files are supported for server-side processing" });
+      }
+
+      const pdfExtract = new PDFExtract();
+      const options = {
+        firstPage: 1,
+        lastPage: 1,
+        password: '',
+        verbosity: -1,
+        normalizeWhitespace: false,
+        disableCombineTextItems: false
+      };
+
+      // Extract text from PDF
+      const pdfData = await new Promise<any>((resolve, reject) => {
+        pdfExtract.extractBuffer(req.file!.buffer, options, (err, data) => {
+          if (err) reject(err);
+          else resolve(data);
+        });
+      });
+
+      // Combine all text content
+      let fullText = '';
+      if (pdfData && pdfData.pages && pdfData.pages.length > 0) {
+        for (const page of pdfData.pages) {
+          if (page.content) {
+            for (const item of page.content) {
+              if (item.str) {
+                fullText += item.str + '\n';
+              }
+            }
+          }
+        }
+      }
+
+      if (!fullText.trim()) {
+        return res.status(400).json({ error: "No text content found in PDF" });
+      }
+
+      res.json({ text: fullText });
+    } catch (error) {
+      console.error("PDF processing error:", error);
+      res.status(500).json({ error: "Failed to process PDF" });
+    }
+  });
   
   // Users
   app.get("/api/users", async (req, res) => {

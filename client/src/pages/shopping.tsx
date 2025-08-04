@@ -1,14 +1,16 @@
 
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus } from "lucide-react";
+import { Plus, Scan } from "lucide-react";
 import { USERS } from "@/lib/constants";
 import type { ShoppingItem, LongTermPurchase } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { AddShoppingItemModal } from "@/components/forms/add-shopping-item-modal";
+import { ReceiptScannerModal } from "@/components/forms/receipt-scanner-modal";
 
 interface ShoppingProps {
   isAddModalOpen: boolean;
@@ -16,6 +18,7 @@ interface ShoppingProps {
 }
 
 export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: ShoppingProps) {
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: activeList } = useQuery<{ id: string; name: string }>({
@@ -72,13 +75,23 @@ export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: Shopping
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">Shopping Lists</h2>
-        <Button 
-          className="rounded-xl"
-          onClick={() => setIsAddModalOpen(true)}
-        >
-          <Plus className="mr-2" size={16} />
-          Add Item
-        </Button>
+        <div className="flex gap-2">
+          <Button 
+            className="rounded-xl"
+            onClick={() => setIsAddModalOpen(true)}
+          >
+            <Plus className="mr-2" size={16} />
+            Add Item
+          </Button>
+          <Button 
+            variant="outline"
+            className="rounded-xl"
+            onClick={() => setIsReceiptModalOpen(true)}
+          >
+            <Scan className="mr-2" size={16} />
+            Scan Receipt
+          </Button>
+        </div>
       </div>
 
       {/* Current Shopping List */}
@@ -188,6 +201,15 @@ export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: Shopping
         <AddShoppingItemModal
           isOpen={isAddModalOpen}
           onOpenChange={setIsAddModalOpen}
+          listId={activeList.id}
+        />
+      )}
+
+      {/* Receipt Scanner Modal */}
+      {activeList && (
+        <ReceiptScannerModal
+          isOpen={isReceiptModalOpen}
+          onOpenChange={setIsReceiptModalOpen}
           listId={activeList.id}
         />
       )}
