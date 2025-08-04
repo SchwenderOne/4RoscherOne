@@ -1,8 +1,10 @@
-# RoomMate App
+# 4Roscher
 
 ## Overview
 
-RoomMate is a comprehensive shared apartment management application designed for two roommates (Alex and Maya) to coordinate their daily living activities. The app provides five main functional areas: shopping management, financial tracking with OCR receipt scanning, cleaning schedules, plant care, and a dashboard for daily task overview. Built as a full-stack web application with mobile-first design principles, it uses modern web technologies to facilitate seamless roommate coordination and household management.
+**4Roscher** is a comprehensive household management application designed to help roommates coordinate their daily living activities. The app provides five main functional areas: shopping management, financial tracking with OCR receipt scanning, cleaning schedules, plant care, and inventory tracking. Built as a full-stack web application with mobile-first design principles, it uses modern web technologies to facilitate seamless household coordination and real-time collaboration.
+
+**Live URL**: Deployed on Railway with automatic GitHub integration.
 
 ## Key Features Implemented
 
@@ -72,9 +74,10 @@ Preferred communication style: Simple, everyday language.
 - **Development Setup**: Vite middleware integration for development with hot module replacement
 
 ### Data Storage Solutions
-- **Database**: PostgreSQL (configured for Neon Database)
+- **Database**: Supabase PostgreSQL for persistent storage
 - **Schema Management**: Drizzle Kit for migrations and schema management
-- **Connection**: Neon Database serverless PostgreSQL with connection pooling
+- **Connection**: Direct PostgreSQL connection with connection pooling
+- **Real-time**: WebSocket server + polling hybrid for live updates
 
 ### Authentication and Authorization
 - **Current State**: No authentication system implemented (hardcoded users Alex and Maya)
@@ -90,8 +93,8 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Database Services
-- **Neon Database**: Serverless PostgreSQL database hosting
-- **Connection**: @neondatabase/serverless for database connectivity
+- **Supabase**: PostgreSQL database hosting with real-time capabilities
+- **Connection**: postgres driver for reliable database connectivity
 
 ### File Storage (Configured but not actively used)
 - **Google Cloud Storage**: Configured for file uploads and storage
@@ -114,6 +117,17 @@ Preferred communication style: Simple, everyday language.
 - **Zod**: Schema validation for API requests and responses
 - **Date-fns**: Date manipulation and formatting utilities
 
-### Replit Integration
-- **Replit Vite Plugins**: Development environment integration with error overlay and cartographer
-- **Development Banner**: Automatic development environment detection and banner display
+## Deployment
+
+### Production Environment
+- **Platform**: Railway with automatic GitHub integration
+- **Build**: Nixpacks with Node.js 20 and automatic dependency installation
+- **Database**: Supabase PostgreSQL (persistent across deployments)
+- **Real-time**: WebSocket server on `/ws` endpoint for live collaboration
+- **SSL**: Automatic HTTPS certificate
+- **Monitoring**: Health checks via `/api/health` endpoint
+
+### Development Environment
+- **Local**: npm run dev (port 3000)
+- **Hot Reload**: Vite HMR for instant development feedback
+- **Database**: Supabase connection with local fallback to in-memory storage

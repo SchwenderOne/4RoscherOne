@@ -2,6 +2,12 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Overview
+
+**4Roscher** is a household management web application built for mobile-first usage, designed to help roommates coordinate shared apartment activities like shopping, cleaning, plant care, and finances.
+
+**Live URL**: The app is deployed on Railway at the production URL provided in the Railway dashboard.
+
 ## Development Commands
 
 - **Run development server**: `npm run dev` - Starts both Express backend and Vite frontend on port 3000
@@ -13,7 +19,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Architecture Overview
 
-This is a household management web application built with a React frontend and Express backend, designed for mobile-first usage.
+**4Roscher** is a full-stack household management application with React frontend and Express backend, optimized for mobile devices and real-time collaboration.
 
 ### Tech Stack
 - **Frontend**: React 18 with TypeScript, Vite, Wouter (routing), TanStack Query, Tailwind CSS
@@ -136,3 +142,38 @@ The app uses a hybrid approach for live updates:
 
 - `npm run db:push` - Push schema changes to Supabase
 - `npm run db:seed` - Seed database with initial data
+
+## Deployment
+
+The application is deployed on Railway with automatic GitHub integration:
+
+### Production Deployment
+- **Platform**: Railway
+- **Build**: Automatic on GitHub push to main branch
+- **Environment**: Node.js 20 with Nixpacks builder
+- **Database**: Supabase PostgreSQL (persistent)
+- **WebSocket**: Full support for real-time features
+- **SSL**: Automatic HTTPS certificate
+
+### Deployment Process
+1. Push code to GitHub repository
+2. Railway automatically detects changes
+3. Builds with `npm ci --include=dev && npm run build`
+4. Starts with `npm run start`
+5. Health monitoring via `/api/health` endpoint
+
+### Production Configuration
+- All environment variables set in Railway dashboard
+- Static files served from `dist/public/`
+- WebSocket server on `/ws` path
+- Auto-restart on failures with exponential backoff
+
+## Key Features
+
+- **Real-time Collaboration**: WebSocket + polling for instant updates
+- **Mobile PWA**: Can be installed on home screens
+- **Receipt Scanning**: PDF and image OCR using Tesseract.js
+- **Push Notifications**: Service worker integration
+- **Offline Capability**: Service worker caching
+- **Multi-user**: User switching between household members
+- **Responsive Design**: Mobile-first with desktop support

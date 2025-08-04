@@ -1,9 +1,11 @@
-# Railway Deployment Guide
+# Railway Deployment Guide for 4Roscher
+
+This guide covers deploying the **4Roscher** household management app to Railway.
 
 ## Quick Deploy to Railway
 
 1. **Create a Railway account**: Go to [railway.app](https://railway.app) and sign up with GitHub
-2. **Connect your repository**: Click "Deploy from GitHub repo" and select this repository
+2. **Connect your repository**: Click "Deploy from GitHub repo" and select `SchwenderOne/4RoscherOne`
 3. **Set environment variables**: In Railway dashboard, go to your service → Variables tab and add:
 
 ```
@@ -18,35 +20,65 @@ VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 4. **Deploy**: Railway will automatically build and deploy your app
 
-## What Railway Will Do
+## What Railway Does
 
-- **Build**: Run `npm ci` → `npm run build`
-- **Start**: Run `npm run start` 
-- **Health checks**: Monitor `/api/health` endpoint
-- **WebSocket support**: Full WebSocket support for real-time features
+- **Build**: Run `npm ci --include=dev` → `npm run build` (Vite + esbuild)
+- **Start**: Run `npm run start` (Node.js production server)
+- **Health checks**: Monitor `/api/health` endpoint every 300s
+- **WebSocket support**: Full WSS support for real-time collaboration
 - **Automatic SSL**: HTTPS certificate provided
-- **Custom domain**: You can add your own domain later
+- **Auto-restart**: Restarts on failures with exponential backoff
+- **Node.js 20**: Uses latest stable Node.js with ES modules support
 
 ## Expected URLs
 
 After deployment, you'll get:
-- **Production URL**: `https://your-app-name.up.railway.app`
-- **Health check**: `https://your-app-name.up.railway.app/api/health`
+- **Production URL**: `https://4roscherone-production.up.railway.app` (or similar)
+- **Health check**: `https://your-url/api/health`
+- **API endpoints**: `https://your-url/api/dashboard`, `/api/shopping-lists`, etc.
 
-## Free Tier Limits
+## Free Tier Reality
 
-- **500 hours/month** runtime
-- **Your usage**: ~10-15 hours/month (3% of limit)
-- **$5 credit monthly** for overages (you won't need it)
+- **500 hours/month** runtime limit
+- **Your actual usage**: ~10-15 hours/month (only 3% of limit!)
+- **$5 credit monthly** for overages (you'll never need it)
+- **Perfect for household apps** with light usage patterns
 
-## Post-Deployment
+## Post-Deployment Setup
 
-1. Test all features work in production
-2. Share the URL with your roommate
-3. Both add the URL to your home screen as a PWA
+1. **Test core features**: Dashboard, shopping lists, real-time updates
+2. **Share URL with roommate**: Both can use simultaneously
+3. **Install as PWA**: Add to home screen on mobile devices
+4. **Test WebSocket**: Verify real-time sync between devices
 
 ## Troubleshooting
 
+Common issues and solutions:
+
+### Build Issues
 - **Build fails**: Check build logs in Railway dashboard
-- **App crashes**: Check deployment logs for errors
-- **WebSocket issues**: Verify WSS connections work in browser dev tools
+- **Dependencies missing**: Ensure `nixpacks.toml` includes `--include=dev`
+- **Node.js version**: Should be using Node.js 20 for ES modules
+
+### Runtime Issues  
+- **App crashes on start**: Check deployment logs for path resolution errors
+- **Database connection**: Verify all Supabase environment variables are set
+- **Static files 404**: Ensure build output is in `dist/public/`
+
+### Real-time Issues
+- **WebSocket connection fails**: Check WSS connections in browser dev tools
+- **Updates not syncing**: Verify `/ws` endpoint is accessible
+- **Polling fallback**: App should still work with 5-second polling if WebSocket fails
+
+### Performance
+- **Slow loading**: Normal for free tier cold starts (~10-30s)
+- **Memory issues**: Monitor Railway dashboard metrics
+- **Database timeouts**: Check Supabase connection pooling
+
+## Success Indicators
+
+✅ **Deployment successful** when you see:
+- Health check returns `{"status":"ok","timestamp":"..."}`
+- WebSocket server logs "New WebSocket client connected"  
+- Dashboard loads with real data from Supabase
+- Real-time updates work between browser tabs
