@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,12 @@ import { AddRoomModal } from "@/components/forms/add-room-modal";
 import type { Room } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
-export default function Cleaning() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+interface CleaningProps {
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (open: boolean) => void;
+}
+
+export default function Cleaning({ isAddModalOpen, setIsAddModalOpen }: CleaningProps) {
   const queryClient = useQueryClient();
 
   const { data: rooms = [], isLoading } = useQuery<Room[]>({

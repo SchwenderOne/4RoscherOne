@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,8 +10,12 @@ import type { ShoppingItem, LongTermPurchase } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { AddShoppingItemModal } from "@/components/forms/add-shopping-item-modal";
 
-export default function Shopping() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+interface ShoppingProps {
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (open: boolean) => void;
+}
+
+export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: ShoppingProps) {
   const queryClient = useQueryClient();
 
   const { data: activeList } = useQuery<{ id: string; name: string }>({

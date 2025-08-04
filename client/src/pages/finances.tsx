@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,8 +7,12 @@ import { USERS } from "@/lib/constants";
 import { AddExpenseModal } from "@/components/forms/add-expense-modal";
 import type { Transaction } from "@shared/schema";
 
-export default function Finances() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+interface FinancesProps {
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (open: boolean) => void;
+}
+
+export default function Finances({ isAddModalOpen, setIsAddModalOpen }: FinancesProps) {
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });

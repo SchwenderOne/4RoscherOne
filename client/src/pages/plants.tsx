@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,12 @@ import { AddPlantModal } from "@/components/forms/add-plant-modal";
 import type { Plant } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
-export default function Plants() {
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+interface PlantsProps {
+  isAddModalOpen: boolean;
+  setIsAddModalOpen: (open: boolean) => void;
+}
+
+export default function Plants({ isAddModalOpen, setIsAddModalOpen }: PlantsProps) {
   const queryClient = useQueryClient();
 
   const { data: plants = [], isLoading } = useQuery<Plant[]>({

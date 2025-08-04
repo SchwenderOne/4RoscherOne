@@ -15,7 +15,7 @@ export function MobileLayout({ children, onFabClick }: MobileLayoutProps) {
       <main className="pb-20">
         {children}
       </main>
-      <FloatingActionButton onClick={onFabClick} />
+      {onFabClick && <FloatingActionButton onClick={onFabClick} />}
       <BottomNavigation />
     </div>
   );

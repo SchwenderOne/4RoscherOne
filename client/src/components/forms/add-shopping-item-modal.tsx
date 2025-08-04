@@ -61,7 +61,7 @@ export function AddShoppingItemModal({
     defaultValues: {
       name: "",
       cost: "",
-      assignedToId: "",
+      assignedToId: "unassigned",
     },
   });
 
@@ -73,7 +73,7 @@ export function AddShoppingItemModal({
         body: JSON.stringify({
           name: data.name,
           cost: data.cost || "0.00",
-          assignedToId: data.assignedToId || null,
+          assignedToId: data.assignedToId === "unassigned" ? null : data.assignedToId,
           isCompleted: false,
         }),
       });
@@ -158,7 +158,7 @@ export function AddShoppingItemModal({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="">Unassigned</SelectItem>
+                      <SelectItem value="unassigned">Unassigned</SelectItem>
                       {users.map((user) => (
                         <SelectItem key={user.id} value={user.id}>
                           {user.displayName}
