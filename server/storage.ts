@@ -6,7 +6,8 @@ import {
   type Transaction, type InsertTransaction,
   type Room, type InsertRoom,
   type Plant, type InsertPlant,
-  type Activity, type InsertActivity
+  type Activity, type InsertActivity,
+  type InventoryItem, type InsertInventoryItem
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 
@@ -50,6 +51,14 @@ export interface IStorage {
   // Activities
   getRecentActivities(limit?: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
+
+  // Inventory
+  getInventoryItems(): Promise<InventoryItem[]>;
+  getInventoryItemsByCategory(category: string): Promise<InventoryItem[]>;
+  createInventoryItem(item: InsertInventoryItem): Promise<InventoryItem>;
+  updateInventoryItem(id: string, updates: Partial<InventoryItem>): Promise<InventoryItem | undefined>;
+  deleteInventoryItem(id: string): Promise<boolean>;
+  getLowStockItems(): Promise<InventoryItem[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -61,6 +70,7 @@ export class MemStorage implements IStorage {
   private rooms: Map<string, Room>;
   private plants: Map<string, Plant>;
   private activities: Map<string, Activity>;
+  private inventoryItems: Map<string, InventoryItem>;
 
   constructor() {
     this.users = new Map();
@@ -71,6 +81,7 @@ export class MemStorage implements IStorage {
     this.rooms = new Map();
     this.plants = new Map();
     this.activities = new Map();
+    this.inventoryItems = new Map();
 
     this.initializeDefaultData();
   }
@@ -340,6 +351,64 @@ export class MemStorage implements IStorage {
     ];
 
     activities.forEach(activity => this.activities.set(activity.id, activity));
+
+    // Create default inventory items
+    const toiletPaper: InventoryItem = {
+      id: randomUUID(),
+      name: "Toilet Paper",
+      category: "bathroom",
+      currentStock: 2,
+      minStockLevel: 4,
+      unit: "rolls",
+      lastRestockedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      lastRestockedBy: alex.id,
+      autoAddToShopping: true,
+      createdAt: new Date(),
+    };
+
+    const toothpaste: InventoryItem = {
+      id: randomUUID(),
+      name: "Toothpaste",
+      category: "bathroom",
+      currentStock: 1,
+      minStockLevel: 2,
+      unit: "tubes",
+      lastRestockedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000),
+      lastRestockedBy: maya.id,
+      autoAddToShopping: true,
+      createdAt: new Date(),
+    };
+
+    const dishSoap: InventoryItem = {
+      id: randomUUID(),
+      name: "Dish Soap",
+      category: "kitchen",
+      currentStock: 0,
+      minStockLevel: 1,
+      unit: "bottles",
+      lastRestockedAt: new Date(Date.now() - 20 * 24 * 60 * 60 * 1000),
+      lastRestockedBy: alex.id,
+      autoAddToShopping: true,
+      createdAt: new Date(),
+    };
+
+    const laundryDetergent: InventoryItem = {
+      id: randomUUID(),
+      name: "Laundry Detergent",
+      category: "cleaning",
+      currentStock: 3,
+      minStockLevel: 1,
+      unit: "bottles",
+      lastRestockedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      lastRestockedBy: maya.id,
+      autoAddToShopping: true,
+      createdAt: new Date(),
+    };
+
+    this.inventoryItems.set(toiletPaper.id, toiletPaper);
+    this.inventoryItems.set(toothpaste.id, toothpaste);
+    this.inventoryItems.set(dishSoap.id, dishSoap);
+    this.inventoryItems.set(laundryDetergent.id, laundryDetergent);
   }
 
   async getUser(id: string): Promise<User | undefined> {
@@ -510,6 +579,49 @@ export class MemStorage implements IStorage {
     };
     this.activities.set(id, activity);
     return activity;
+  }
+
+  // Inventory Methods
+  async getInventoryItems(): Promise<InventoryItem[]> {
+    return Array.from(this.inventoryItems.values()).sort((a, b) => 
+      a.category.localeCompare(b.category) || a.name.localeCompare(b.name)
+    );
+  }
+
+  async getInventoryItemsByCategory(category: string): Promise<InventoryItem[]> {
+    return Array.from(this.inventoryItems.values())
+      .filter(item => item.category === category)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  async createInventoryItem(insertItem: InsertInventoryItem): Promise<InventoryItem> {
+    const id = randomUUID();
+    const item: InventoryItem = { 
+      ...insertItem, 
+      id, 
+      createdAt: new Date() 
+    };
+    this.inventoryItems.set(id, item);
+    return item;
+  }
+
+  async updateInventoryItem(id: string, updates: Partial<InventoryItem>): Promise<InventoryItem | undefined> {
+    const item = this.inventoryItems.get(id);
+    if (!item) return undefined;
+    
+    const updatedItem = { ...item, ...updates };
+    this.inventoryItems.set(id, updatedItem);
+    return updatedItem;
+  }
+
+  async deleteInventoryItem(id: string): Promise<boolean> {
+    return this.inventoryItems.delete(id);
+  }
+
+  async getLowStockItems(): Promise<InventoryItem[]> {
+    return Array.from(this.inventoryItems.values())
+      .filter(item => item.currentStock <= item.minStockLevel)
+      .sort((a, b) => (a.currentStock - a.minStockLevel) - (b.currentStock - b.minStockLevel));
   }
 }
 

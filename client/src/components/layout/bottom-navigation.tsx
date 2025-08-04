@@ -1,4 +1,4 @@
-import { Home, ShoppingCart, CreditCard, Fan, Leaf } from "lucide-react";
+import { Home, ShoppingCart, CreditCard, Fan, Leaf, Package } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { ROUTES } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ const navItems = [
   { icon: CreditCard, label: "Finances", href: ROUTES.FINANCES },
   { icon: Fan, label: "Cleaning", href: ROUTES.CLEANING },
   { icon: Leaf, label: "Plants", href: ROUTES.PLANTS },
+  { icon: Package, label: "Inventory", href: ROUTES.INVENTORY },
 ];
 
 export function BottomNavigation() {

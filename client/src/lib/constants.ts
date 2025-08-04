@@ -20,7 +20,8 @@ export const ROUTES = {
   SHOPPING: '/shopping',
   FINANCES: '/finances',
   CLEANING: '/cleaning',
-  PLANTS: '/plants'
+  PLANTS: '/plants',
+  INVENTORY: '/inventory'
 } as const;
 
 export const ACTIVITY_TYPES = {

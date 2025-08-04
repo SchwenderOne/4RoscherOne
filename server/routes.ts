@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import multer from "multer";
 import { PDFExtract } from "pdf.js-extract";
 import { storage } from "./storage";
-import { insertShoppingItemSchema, insertTransactionSchema, insertActivitySchema } from "@shared/schema";
+import { insertShoppingItemSchema, insertTransactionSchema, insertActivitySchema, insertInventoryItemSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -340,6 +340,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
       taskCount: urgentTasks.length + todayTasks.length,
       recentActivities: activities
     });
+  });
+
+  // Inventory Management Routes
+  app.get("/api/inventory", async (req, res) => {
+    try {
+      const items = await storage.getInventoryItems();
+      res.json(items);
+    } catch (error) {
+      console.error('Error fetching inventory:', error);
+      res.status(500).json({ error: 'Failed to fetch inventory' });
+    }
+  });
+
+  app.get("/api/inventory/category/:category", async (req, res) => {
+    try {
+      const items = await storage.getInventoryItemsByCategory(req.params.category);
+      res.json(items);
+    } catch (error) {
+      console.error('Error fetching inventory by category:', error);
+      res.status(500).json({ error: 'Failed to fetch inventory' });
+    }
+  });
+
+  app.get("/api/inventory/low-stock", async (req, res) => {
+    try {
+      const items = await storage.getLowStockItems();
+      res.json(items);
+    } catch (error) {
+      console.error('Error fetching low stock items:', error);
+      res.status(500).json({ error: 'Failed to fetch low stock items' });
+    }
+  });
+
+  app.post("/api/inventory", async (req, res) => {
+    try {
+      const validatedData = insertInventoryItemSchema.parse(req.body);
+      const item = await storage.createInventoryItem(validatedData);
+      res.status(201).json(item);
+    } catch (error) {
+      console.error('Error creating inventory item:', error);
+      res.status(400).json({ error: 'Failed to create inventory item' });
+    }
+  });
+
+  app.patch("/api/inventory/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const item = await storage.updateInventoryItem(id, req.body);
+      if (!item) {
+        return res.status(404).json({ error: 'Inventory item not found' });
+      }
+      res.json(item);
+    } catch (error) {
+      console.error('Error updating inventory item:', error);
+      res.status(500).json({ error: 'Failed to update inventory item' });
+    }
+  });
+
+  app.delete("/api/inventory/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteInventoryItem(id);
+      if (!deleted) {
+        return res.status(404).json({ error: 'Inventory item not found' });
+      }
+      res.status(204).send();
+    } catch (error) {
+      console.error('Error deleting inventory item:', error);
+      res.status(500).json({ error: 'Failed to delete inventory item' });
+    }
   });
 
   const httpServer = createServer(app);

@@ -15,6 +15,7 @@ import Shopping from "@/pages/shopping";
 import Finances from "@/pages/finances";
 import Cleaning from "@/pages/cleaning";
 import Plants from "@/pages/plants";
+import Inventory from "@/pages/inventory";
 import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
@@ -36,6 +37,7 @@ function Router() {
     finances: false,
     cleaning: false,
     plants: false,
+    inventory: false,
     receiptScanner: false,
   });
 
@@ -53,6 +55,9 @@ function Router() {
       case ROUTES.PLANTS:
         setModals(prev => ({ ...prev, plants: true }));
         break;
+      case ROUTES.INVENTORY:
+        setModals(prev => ({ ...prev, inventory: true }));
+        break;
     }
   };
 
@@ -62,7 +67,7 @@ function Router() {
     }
   };
 
-  const shouldShowFab = [ROUTES.SHOPPING, ROUTES.FINANCES, ROUTES.CLEANING, ROUTES.PLANTS].includes(location as typeof ROUTES[keyof typeof ROUTES]);
+  const shouldShowFab = [ROUTES.SHOPPING, ROUTES.FINANCES, ROUTES.CLEANING, ROUTES.PLANTS, ROUTES.INVENTORY].includes(location as typeof ROUTES[keyof typeof ROUTES]);
 
   return (
     <MobileLayout 
@@ -89,6 +94,9 @@ function Router() {
         </Route>
         <Route path={ROUTES.PLANTS}>
           {() => <Plants isAddModalOpen={modals.plants} setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, plants: open }))} />}
+        </Route>
+        <Route path={ROUTES.INVENTORY}>
+          {() => <Inventory isAddModalOpen={modals.inventory} setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, inventory: open }))} />}
         </Route>
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />

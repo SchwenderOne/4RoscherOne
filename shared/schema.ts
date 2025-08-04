@@ -69,6 +69,20 @@ export const plants = pgTable("plants", {
   notes: text("notes"),
 });
 
+// Household Inventory
+export const inventoryItems = pgTable("inventory_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  category: text("category").notNull(), // 'bathroom', 'kitchen', 'cleaning', 'personal'
+  currentStock: integer("current_stock").notNull().default(0),
+  minStockLevel: integer("min_stock_level").notNull().default(1),
+  unit: text("unit").notNull(), // 'rolls', 'bottles', 'boxes', 'pieces'
+  lastRestockedAt: timestamp("last_restocked_at"),
+  lastRestockedBy: varchar("last_restocked_by").references(() => users.id),
+  autoAddToShopping: boolean("auto_add_to_shopping").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const activities = pgTable("activities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull().references(() => users.id),
@@ -87,6 +101,7 @@ export const insertTransactionSchema = createInsertSchema(transactions).omit({ i
 export const insertRoomSchema = createInsertSchema(rooms).omit({ id: true });
 export const insertPlantSchema = createInsertSchema(plants).omit({ id: true });
 export const insertActivitySchema = createInsertSchema(activities).omit({ id: true, createdAt: true });
+export const insertInventoryItemSchema = createInsertSchema(inventoryItems).omit({ id: true, createdAt: true });
 
 // Types
 export type User = typeof users.$inferSelect;
@@ -105,3 +120,5 @@ export type Plant = typeof plants.$inferSelect;
 export type InsertPlant = z.infer<typeof insertPlantSchema>;
 export type Activity = typeof activities.$inferSelect;
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
+export type InventoryItem = typeof inventoryItems.$inferSelect;
+export type InsertInventoryItem = z.infer<typeof insertInventoryItemSchema>;
