@@ -2,7 +2,46 @@
 
 ## Overview
 
-RoomMate is a shared apartment management application designed for two roommates (Alex and Maya) to coordinate their daily living activities. The app provides five main functional areas: shopping management, financial tracking, cleaning schedules, plant care, and a dashboard for daily task overview. Built as a full-stack web application with mobile-first design principles, it uses modern web technologies to facilitate seamless roommate coordination and household management.
+RoomMate is a comprehensive shared apartment management application designed for two roommates (Alex and Maya) to coordinate their daily living activities. The app provides five main functional areas: shopping management, financial tracking with OCR receipt scanning, cleaning schedules, plant care, and a dashboard for daily task overview. Built as a full-stack web application with mobile-first design principles, it uses modern web technologies to facilitate seamless roommate coordination and household management.
+
+## Key Features Implemented
+
+### 📱 Mobile-First Design
+- Bottom navigation with 5 main sections
+- Expandable floating action buttons for quick actions
+- Dark/light mode support with theme switching
+- Touch-optimized interface with proper spacing
+
+### 🛒 Shopping Management
+- Active shopping list with item management
+- Add items with cost estimates and assignments
+- Mark items as completed
+- Long-term purchase planning with cost splitting
+
+### 💰 Financial Tracking with OCR
+- **Receipt Scanning**: Upload PDF receipts for automatic text extraction
+- **Smart Categorization**: Swipe-based UI to categorize expenses as "Me", "Roommate", or "Shared"
+- **Automatic Expense Splitting**: Shared items automatically split 50/50 between roommates
+- **Balance Tracking**: Real-time balance calculations showing who owes whom
+- **Transaction History**: Complete record of all expenses with timestamps
+
+### 🧽 Cleaning Management
+- Room-based cleaning schedules with frequency settings
+- Visual progress indicators showing cleaning status
+- Overdue tracking with color-coded alerts
+- One-click marking of rooms as cleaned
+
+### 🌱 Plant Care
+- Individual plant profiles with watering schedules
+- Status tracking (due today, overdue, good condition)
+- Quick watering actions with user attribution
+- Visual status badges for easy identification
+
+### 📊 Dashboard Overview
+- Current financial balance summary
+- Urgent tasks requiring immediate attention
+- Recent activity feed
+- Quick navigation to action items
 
 ## User Preferences
 
