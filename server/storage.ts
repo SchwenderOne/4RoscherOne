@@ -102,7 +102,7 @@ export class MemStorage implements IStorage {
       name: "Kitchen",
       icon: "utensils",
       cleaningFrequencyDays: 3,
-      lastCleanedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      lastCleanedAt: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000), // 4 days ago (overdue)
       lastCleanedById: maya.id,
     };
 
@@ -111,12 +111,22 @@ export class MemStorage implements IStorage {
       name: "Bathroom", 
       icon: "bath",
       cleaningFrequencyDays: 7,
-      lastCleanedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+      lastCleanedAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 days ago (due tomorrow)
       lastCleanedById: alex.id,
+    };
+
+    const livingRoom: Room = {
+      id: randomUUID(),
+      name: "Living Room",
+      icon: "sofa",
+      cleaningFrequencyDays: 14,
+      lastCleanedAt: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000), // exactly due today
+      lastCleanedById: maya.id,
     };
 
     this.rooms.set(kitchen.id, kitchen);
     this.rooms.set(bathroom.id, bathroom);
+    this.rooms.set(livingRoom.id, livingRoom);
 
     // Create default shopping list
     const groceryList: ShoppingList = {
@@ -128,6 +138,125 @@ export class MemStorage implements IStorage {
 
     this.shoppingLists.set(groceryList.id, groceryList);
 
+    // Create shopping items
+    const shoppingItems = [
+      {
+        id: randomUUID(),
+        listId: groceryList.id,
+        name: "Milk",
+        cost: "3.50",
+        assignedToId: alex.id,
+        isCompleted: false,
+        createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000), // 2 hours ago
+      },
+      {
+        id: randomUUID(),
+        listId: groceryList.id,
+        name: "Bread",
+        cost: "2.80",
+        assignedToId: maya.id,
+        isCompleted: true,
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+      },
+      {
+        id: randomUUID(),
+        listId: groceryList.id,
+        name: "Eggs",
+        cost: "4.20",
+        assignedToId: alex.id,
+        isCompleted: false,
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+      },
+      {
+        id: randomUUID(),
+        listId: groceryList.id,
+        name: "Apples",
+        cost: "5.60",
+        assignedToId: null,
+        isCompleted: false,
+        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+      }
+    ];
+
+    shoppingItems.forEach(item => this.shoppingItems.set(item.id, item));
+
+    // Create long-term purchases
+    const longTermPurchases = [
+      {
+        id: randomUUID(),
+        name: "New Couch",
+        totalCost: "800.00",
+        neededBy: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days from now
+        alexShare: "400.00",
+        mayaShare: "400.00",
+        isPurchased: false,
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
+      },
+      {
+        id: randomUUID(),
+        name: "Dishwasher",
+        totalCost: "450.00",
+        neededBy: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from now
+        alexShare: "180.00",
+        mayaShare: "270.00",
+        isPurchased: false,
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      }
+    ];
+
+    longTermPurchases.forEach(purchase => this.longTermPurchases.set(purchase.id, purchase));
+
+    // Create transactions
+    const transactions = [
+      {
+        id: randomUUID(),
+        description: "Rent Payment",
+        amount: "1200.00",
+        paidById: alex.id,
+        splitBetween: [alex.id, maya.id],
+        category: "Housing",
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+      },
+      {
+        id: randomUUID(),
+        description: "Electricity Bill",
+        amount: "85.50",
+        paidById: maya.id,
+        splitBetween: [alex.id, maya.id],
+        category: "Utilities",
+        createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000), // 3 days ago
+      },
+      {
+        id: randomUUID(),
+        description: "Groceries - Whole Foods",
+        amount: "67.80",
+        paidById: alex.id,
+        splitBetween: [alex.id, maya.id],
+        category: "Food",
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000), // 2 days ago
+      },
+      {
+        id: randomUUID(),
+        description: "Internet Bill",
+        amount: "45.00",
+        paidById: maya.id,
+        splitBetween: [alex.id, maya.id],
+        category: "Utilities",
+        createdAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
+      },
+      {
+        id: randomUUID(),
+        description: "Takeout Pizza",
+        amount: "28.50",
+        paidById: alex.id,
+        splitBetween: [alex.id, maya.id],
+        category: "Food",
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+      }
+    ];
+
+    transactions.forEach(transaction => this.transactions.set(transaction.id, transaction));
+
     // Create default plants
     const spiderPlant: Plant = {
       id: randomUUID(),
@@ -135,7 +264,7 @@ export class MemStorage implements IStorage {
       location: "Living Room Window",
       imageUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200",
       wateringFrequencyDays: 3,
-      lastWateredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
+      lastWateredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago (overdue)
       lastWateredById: maya.id,
       notes: "Bright indirect light, easy to propagate",
     };
@@ -146,13 +275,71 @@ export class MemStorage implements IStorage {
       location: "Desk Corner",
       imageUrl: "https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200",
       wateringFrequencyDays: 7,
-      lastWateredAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+      lastWateredAt: new Date(Date.now() - 6 * 24 * 60 * 60 * 1000), // 6 days ago (due tomorrow)
       lastWateredById: alex.id,
       notes: "Drought tolerant succulent",
     };
 
+    const monstera: Plant = {
+      id: randomUUID(),
+      name: "Monstera Deliciosa",
+      location: "Bedroom Corner",
+      imageUrl: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200",
+      wateringFrequencyDays: 5,
+      lastWateredAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // exactly due today
+      lastWateredById: maya.id,
+      notes: "Loves humidity, fenestrated leaves",
+    };
+
     this.plants.set(spiderPlant.id, spiderPlant);
     this.plants.set(jadePlant.id, jadePlant);
+    this.plants.set(monstera.id, monstera);
+
+    // Create activity entries
+    const activities = [
+      {
+        id: randomUUID(),
+        userId: alex.id,
+        type: "expense_added",
+        description: "Added expense: Takeout Pizza (€28.50)",
+        relatedId: null,
+        createdAt: new Date(Date.now() - 6 * 60 * 60 * 1000), // 6 hours ago
+      },
+      {
+        id: randomUUID(),
+        userId: maya.id,
+        type: "shopping_item_completed",
+        description: "Marked 'Bread' as completed",
+        relatedId: null,
+        createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000), // 3 hours ago
+      },
+      {
+        id: randomUUID(),
+        userId: alex.id,
+        type: "shopping_item_added",
+        description: "Added 'Eggs' to shopping list",
+        relatedId: null,
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000), // 1 hour ago
+      },
+      {
+        id: randomUUID(),
+        userId: maya.id,
+        type: "plant_watered",
+        description: "Watered Monstera Deliciosa",
+        relatedId: null,
+        createdAt: new Date(Date.now() - 30 * 60 * 1000), // 30 minutes ago
+      },
+      {
+        id: randomUUID(),
+        userId: alex.id,
+        type: "shopping_item_added",
+        description: "Added 'Apples' to shopping list",
+        relatedId: null,
+        createdAt: new Date(Date.now() - 15 * 60 * 1000), // 15 minutes ago
+      }
+    ];
+
+    activities.forEach(activity => this.activities.set(activity.id, activity));
   }
 
   async getUser(id: string): Promise<User | undefined> {
