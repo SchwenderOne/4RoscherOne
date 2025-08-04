@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, TriangleAlert, History, ShoppingCart, Fan } from "lucide-react";
+import { CalendarDays, TriangleAlert, History, ShoppingCart, Fan, ChevronRight, Leaf } from "lucide-react";
 import { USERS } from "@/lib/constants";
 
 interface DashboardData {
@@ -32,6 +33,7 @@ interface DashboardData {
 }
 
 export default function Dashboard() {
+  const [, setLocation] = useLocation();
   const { data: dashboardData, isLoading } = useQuery<DashboardData>({
     queryKey: ["/api/dashboard"],
   });
@@ -97,10 +99,16 @@ export default function Dashboard() {
         
         {/* Quick Stats */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <Card>
+          <Card 
+            className="cursor-pointer hover:bg-muted/50 transition-colors"
+            onClick={() => setLocation("/tasks-today")}
+          >
             <CardContent className="p-4 text-center">
               <div className="text-2xl font-bold text-primary">{dashboardData.taskCount}</div>
-              <div className="text-sm text-muted-foreground">Tasks Today</div>
+              <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                Tasks Today
+                <ChevronRight className="h-3 w-3" />
+              </div>
             </CardContent>
           </Card>
           <Card>

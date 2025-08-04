@@ -8,6 +8,7 @@ import { MobileLayout } from "@/components/layout/mobile-layout";
 import { ROUTES } from "@/lib/constants";
 
 import Dashboard from "@/pages/dashboard";
+import TasksToday from "@/pages/tasks-today";
 import Shopping from "@/pages/shopping";
 import Finances from "@/pages/finances";
 import Cleaning from "@/pages/cleaning";
@@ -19,6 +20,7 @@ function Router() {
     <MobileLayout>
       <Switch>
         <Route path={ROUTES.DASHBOARD} component={Dashboard} />
+        <Route path="/tasks-today" component={TasksToday} />
         <Route path={ROUTES.SHOPPING} component={Shopping} />
         <Route path={ROUTES.FINANCES} component={Finances} />
         <Route path={ROUTES.CLEANING} component={Cleaning} />

@@ -155,14 +155,14 @@ export default function Shopping() {
                 )}
                 <div className="flex space-x-2">
                   <Badge 
-                    variant="secondary"
-                    style={{ backgroundColor: `${USERS.ALEX.color}20`, color: USERS.ALEX.color }}
+                    variant="outline"
+                    className="border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-200"
                   >
                     Alex: €{parseFloat(purchase.alexShare).toFixed(2)}
                   </Badge>
                   <Badge 
-                    variant="secondary"
-                    style={{ backgroundColor: `${USERS.MAYA.color}20`, color: USERS.MAYA.color }}
+                    variant="outline"
+                    className="border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200"
                   >
                     Maya: €{parseFloat(purchase.mayaShare).toFixed(2)}
                   </Badge>
