@@ -42,12 +42,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertShoppingItemSchema.parse({
         ...req.body,
-        shoppingListId: req.params.listId
+        listId: req.params.listId
       });
       const item = await storage.createShoppingItem(validatedData);
       res.status(201).json(item);
     } catch (error) {
-      res.status(400).json({ error: "Invalid data" });
+      console.error("Shopping item creation error:", error);
+      res.status(400).json({ error: "Invalid data", details: error.message });
     }
   });
 
