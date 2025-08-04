@@ -44,7 +44,7 @@ function Router() {
     }
   };
 
-  const shouldShowFab = [ROUTES.SHOPPING, ROUTES.FINANCES, ROUTES.CLEANING, ROUTES.PLANTS].includes(location);
+  const shouldShowFab = [ROUTES.SHOPPING, ROUTES.FINANCES, ROUTES.CLEANING, ROUTES.PLANTS].includes(location as typeof ROUTES[keyof typeof ROUTES]);
 
   return (
     <MobileLayout onFabClick={shouldShowFab ? handleFabClick : undefined}>

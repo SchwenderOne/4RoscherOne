@@ -1,10 +1,12 @@
 
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, ShoppingCart } from "lucide-react";
+import { Plus, ShoppingCart, ScanLine } from "lucide-react";
 import { USERS } from "@/lib/constants";
 import { AddExpenseModal } from "@/components/forms/add-expense-modal";
+import { ExpenseReceiptScanner } from "@/components/forms/expense-receipt-scanner";
 import type { Transaction } from "@shared/schema";
 
 interface FinancesProps {
@@ -13,6 +15,9 @@ interface FinancesProps {
 }
 
 export default function Finances({ isAddModalOpen, setIsAddModalOpen }: FinancesProps) {
+  const [isReceiptScannerOpen, setIsReceiptScannerOpen] = useState(false);
+  const [currentUserId] = useState(USERS.ALEX.id); // TODO: Get from auth context
+  
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
@@ -138,7 +143,18 @@ export default function Finances({ isAddModalOpen, setIsAddModalOpen }: Finances
       {/* Recent Transactions */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base">Recent Transactions</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-base">Recent Transactions</CardTitle>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsReceiptScannerOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <ScanLine className="h-4 w-4" />
+              Scan Receipt
+            </Button>
+          </div>
         </CardHeader>
         
         <CardContent>
@@ -175,7 +191,7 @@ export default function Finances({ isAddModalOpen, setIsAddModalOpen }: Finances
                         {paidBy.displayName} paid
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {formatTimeAgo(transaction.createdAt)}
+                        {formatTimeAgo(new Date(transaction.createdAt).toISOString())}
                       </div>
                     </div>
                   </div>
@@ -190,6 +206,13 @@ export default function Finances({ isAddModalOpen, setIsAddModalOpen }: Finances
       <AddExpenseModal
         isOpen={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
+      />
+
+      {/* Receipt Scanner Modal */}
+      <ExpenseReceiptScanner
+        isOpen={isReceiptScannerOpen}
+        onOpenChange={setIsReceiptScannerOpen}
+        currentUserId={currentUserId}
       />
     </div>
   );

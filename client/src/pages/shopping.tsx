@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Scan } from "lucide-react";
+import { Plus } from "lucide-react";
 import { USERS } from "@/lib/constants";
 import type { ShoppingItem, LongTermPurchase } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { AddShoppingItemModal } from "@/components/forms/add-shopping-item-modal";
-import { ReceiptScannerModal } from "@/components/forms/receipt-scanner-modal";
+
 
 interface ShoppingProps {
   isAddModalOpen: boolean;
@@ -18,7 +18,7 @@ interface ShoppingProps {
 }
 
 export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: ShoppingProps) {
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+
   const queryClient = useQueryClient();
 
   const { data: activeList } = useQuery<{ id: string; name: string }>({
@@ -82,14 +82,6 @@ export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: Shopping
           >
             <Plus className="mr-2" size={16} />
             Add Item
-          </Button>
-          <Button 
-            variant="outline"
-            className="rounded-xl"
-            onClick={() => setIsReceiptModalOpen(true)}
-          >
-            <Scan className="mr-2" size={16} />
-            Scan Receipt
           </Button>
         </div>
       </div>
@@ -205,14 +197,7 @@ export default function Shopping({ isAddModalOpen, setIsAddModalOpen }: Shopping
         />
       )}
 
-      {/* Receipt Scanner Modal */}
-      {activeList && (
-        <ReceiptScannerModal
-          isOpen={isReceiptModalOpen}
-          onOpenChange={setIsReceiptModalOpen}
-          listId={activeList.id}
-        />
-      )}
+
     </div>
   );
 }
