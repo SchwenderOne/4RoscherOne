@@ -1,0 +1,566 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RoomMate - Shared Apartment Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'roboto': ['Roboto', 'sans-serif']
+                    },
+                    colors: {
+                        'user1': '#1976D2',
+                        'user2': '#388E3C',
+                        'overdue': '#F44336',
+                        'due-today': '#FF9800',
+                        'complete': '#4CAF50'
+                    }
+                }
+            },
+            darkMode: 'class'
+        };
+    </script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .floating-btn {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+        }
+        .floating-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
+        .card-shadow {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="font-roboto bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300">
+    <!-- Top Header -->
+    <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
+        <div class="flex items-center justify-between p-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 bg-gradient-to-br from-user1 to-user2 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-home text-white text-sm"></i>
+                </div>
+                <h1 class="text-xl font-medium">RoomMate</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- User Switch -->
+                <div class="flex items-center space-x-2 bg-gray-100 dark:bg-gray-700 rounded-full p-1">
+                    <button data-bind="currentUser === 'user1'" class="w-8 h-8 rounded-full bg-user1 text-white text-xs font-medium">A</button>
+                    <button data-bind="currentUser === 'user2'" class="w-8 h-8 rounded-full bg-user2 text-white text-xs font-medium">M</button>
+                </div>
+                <!-- Theme Toggle -->
+                <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="pb-20">
+        <!-- @COMPONENT: DashboardView -->
+        <div id="dashboard" class="tab-content active p-4 space-y-6">
+            <!-- Today's Overview -->
+            <section class="slide-in">
+                <h2 class="text-lg font-medium mb-4 flex items-center">
+                    <i class="fas fa-calendar-day text-user1 mr-2"></i>
+                    Today's Overview
+                </h2>
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                        <div class="text-2xl font-bold text-user1" data-bind="todayTasks.length">6</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Tasks Today</div>
+                    </div>
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                        <div class="text-2xl font-bold text-due-today" data-bind="balance.formatted">€12.50</div>
+                        <div class="text-sm text-gray-500 dark:text-gray-400">Your Balance</div>
+                    </div>
+                </div>
+
+                <!-- Urgent Tasks -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                    <h3 class="font-medium mb-3 text-red-600 dark:text-red-400">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        Urgent
+                    </h3>
+                    <!-- @MAP: urgentTasks.map(task => ( -->
+                    <div class="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-700 last:border-0">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 bg-overdue rounded-full"></div>
+                            <span class="text-sm" data-bind="task.title">Water Spider Plant</span>
+                        </div>
+                        <span class="text-xs text-gray-500 bg-red-50 dark:bg-red-900/20 px-2 py-1 rounded-full" data-bind="task.daysOverdue">2 days overdue</span>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+
+            <!-- Today's Tasks -->
+            <section class="slide-in">
+                <h3 class="font-medium mb-3 flex items-center">
+                    <i class="fas fa-tasks text-due-today mr-2"></i>
+                    Due Today
+                </h3>
+                
+                <div class="space-y-3">
+                    <!-- @MAP: todayTasks.map(task => ( -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                                    <i class="fas fa-shopping-cart text-user1 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm" data-bind="task.title">Weekly Grocery Shopping</div>
+                                    <div class="text-xs text-gray-500" data-bind="task.category">Shopping • Your turn</div>
+                                </div>
+                            </div>
+                            <button class="text-user1 bg-blue-50 dark:bg-blue-900/20 rounded-lg px-3 py-1 text-xs font-medium">
+                                View
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                                    <i class="fas fa-broom text-user2 text-sm"></i>
+                                </div>
+                                <div>
+                                    <div class="font-medium text-sm" data-bind="task.title">Clean Kitchen</div>
+                                    <div class="text-xs text-gray-500" data-bind="task.category">Cleaning • Alex's turn</div>
+                                </div>
+                            </div>
+                            <div class="w-6 h-6 rounded-full bg-user1 flex items-center justify-center">
+                                <span class="text-xs text-white font-medium">A</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+
+            <!-- Recent Activity -->
+            <section class="slide-in">
+                <h3 class="font-medium mb-3 flex items-center">
+                    <i class="fas fa-history text-gray-600 dark:text-gray-400 mr-2"></i>
+                    Recent Activity
+                </h3>
+                
+                <div class="space-y-3">
+                    <!-- @MAP: recentActivity.map(activity => ( -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-user2 flex items-center justify-center mt-1">
+                                <span class="text-xs text-white font-medium">M</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm" data-bind="activity.description">Maya added €35.60 for groceries</div>
+                                <div class="text-xs text-gray-500 mt-1" data-bind="activity.timestamp">2 hours ago</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-user1 flex items-center justify-center mt-1">
+                                <span class="text-xs text-white font-medium">A</span>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm" data-bind="activity.description">Alex completed bathroom cleaning</div>
+                                <div class="text-xs text-gray-500 mt-1" data-bind="activity.timestamp">Yesterday</div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </section>
+        </div>
+        <!-- @END_COMPONENT: DashboardView -->
+
+        <!-- @COMPONENT: ShoppingView -->
+        <div id="shopping" class="tab-content p-4 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-medium">Shopping Lists</h2>
+                <button class="bg-user1 text-white rounded-xl px-4 py-2 text-sm font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Item
+                </button>
+            </div>
+
+            <!-- Current Shopping List -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow">
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <div class="flex items-center justify-between">
+                        <h3 class="font-medium">Weekly Groceries</h3>
+                        <span class="text-sm text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full" data-bind="list.totalCost">€47.80 total</span>
+                    </div>
+                </div>
+                
+                <div class="p-4 space-y-3">
+                    <!-- @MAP: shoppingItems.map(item => ( -->
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <input type="checkbox" class="w-4 h-4 text-user1 rounded" data-bind="item.completed">
+                            <span class="text-sm" data-bind="item.name">Milk (1L)</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs text-gray-500" data-bind="item.cost">€1.20</span>
+                            <div class="w-4 h-4 rounded-full bg-user1"></div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+
+            <!-- Long-term Purchases -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow">
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="font-medium">Long-term Purchases</h3>
+                </div>
+                
+                <div class="p-4 space-y-3">
+                    <!-- @MAP: longTermItems.map(item => ( -->
+                    <div class="border border-gray-200 dark:border-gray-600 rounded-lg p-3">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="font-medium text-sm" data-bind="item.name">Coffee Machine</span>
+                            <span class="text-sm text-due-today font-medium" data-bind="item.totalCost">€159.99</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mb-2" data-bind="item.needBy">Needed by: Next month</div>
+                        <div class="flex space-x-2">
+                            <span class="text-xs bg-user1 text-white px-2 py-1 rounded-full" data-bind="item.alexShare">Alex: €80</span>
+                            <span class="text-xs bg-user2 text-white px-2 py-1 rounded-full" data-bind="item.mayaShare">Maya: €80</span>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: ShoppingView -->
+
+        <!-- @COMPONENT: FinancesView -->
+        <div id="finances" class="tab-content p-4 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-medium">Finances</h2>
+                <button class="bg-user1 text-white rounded-xl px-4 py-2 text-sm font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Expense
+                </button>
+            </div>
+
+            <!-- Balance Overview -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-user1" data-bind="alex.balance">€12.50</div>
+                        <div class="text-sm text-gray-500">Alex owes Maya</div>
+                    </div>
+                </div>
+                <div class="bg-white dark:bg-gray-800 rounded-xl p-4 card-shadow">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-complete" data-bind="maya.balance">€0.00</div>
+                        <div class="text-sm text-gray-500">Maya is even</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow">
+                <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <h3 class="font-medium">Recent Transactions</h3>
+                </div>
+                
+                <div class="divide-y divide-gray-100 dark:divide-gray-700">
+                    <!-- @MAP: transactions.map(transaction => ( -->
+                    <div class="p-4 flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                                <i class="fas fa-shopping-cart text-green-600 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-medium text-sm" data-bind="transaction.description">Grocery Store - REWE</div>
+                                <div class="text-xs text-gray-500" data-bind="transaction.details">Split between Alex & Maya</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-medium text-sm" data-bind="transaction.amount">€35.60</div>
+                            <div class="text-xs text-gray-500" data-bind="transaction.paidBy">Maya paid</div>
+                        </div>
+                    </div>
+                    <!-- @END_MAP )) -->
+                </div>
+            </div>
+        </div>
+        <!-- @END_COMPONENT: FinancesView -->
+
+        <!-- @COMPONENT: CleaningView -->
+        <div id="cleaning" class="tab-content p-4 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-medium">Cleaning Schedule</h2>
+                <button class="bg-user1 text-white rounded-xl px-4 py-2 text-sm font-medium">
+                    <i class="fas fa-check mr-2"></i>Mark Done
+                </button>
+            </div>
+
+            <!-- Room Cards -->
+            <div class="space-y-4">
+                <!-- @MAP: rooms.map(room => ( -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                                    <i class="fas fa-utensils text-user1"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium" data-bind="room.name">Kitchen</h3>
+                                    <div class="text-xs text-gray-500" data-bind="room.lastCleaned">Last cleaned 3 days ago</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium text-due-today" data-bind="room.status">Due Today</div>
+                                <div class="flex items-center space-x-1 mt-1">
+                                    <div class="w-4 h-4 rounded-full bg-user1"></div>
+                                    <span class="text-xs text-gray-500" data-bind="room.assignedTo">Alex's turn</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress indicator -->
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-due-today h-2 rounded-full" style="width: 75%" data-bind="room.dueProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow">
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                                    <i class="fas fa-bath text-user2"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-medium" data-bind="room.name">Bathroom</h3>
+                                    <div class="text-xs text-gray-500" data-bind="room.lastCleaned">Last cleaned yesterday</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium text-complete" data-bind="room.status">Clean</div>
+                                <div class="flex items-center space-x-1 mt-1">
+                                    <div class="w-4 h-4 rounded-full bg-user2"></div>
+                                    <span class="text-xs text-gray-500" data-bind="room.nextAssigned">Maya next</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Progress indicator -->
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-complete h-2 rounded-full" style="width: 100%" data-bind="room.dueProgress"></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+        </div>
+        <!-- @END_COMPONENT: CleaningView -->
+
+        <!-- @COMPONENT: PlantsView -->
+        <div id="plants" class="tab-content p-4 space-y-6">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-medium">Plant Care</h2>
+                <button class="bg-user2 text-white rounded-xl px-4 py-2 text-sm font-medium">
+                    <i class="fas fa-plus mr-2"></i>Add Plant
+                </button>
+            </div>
+
+            <!-- Plant Cards -->
+            <div class="space-y-4">
+                <!-- @MAP: plants.map(plant => ( -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow overflow-hidden">
+                    <!-- Green leafy plant in a modern pot on a windowsill -->
+                    <img src="https://images.unsplash.com/photo-1416879595882-3373a0480b5b?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                         alt="Spider plant in white pot" 
+                         class="w-full h-32 object-cover" 
+                         data-mock-image="true" 
+                         data-implementation="Use plant photo from user upload" />
+                    
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h3 class="font-medium" data-bind="plant.name">Spider Plant</h3>
+                                <div class="text-xs text-gray-500" data-bind="plant.location">Living Room Window</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium text-overdue" data-bind="plant.status">Overdue</div>
+                                <div class="text-xs text-gray-500" data-bind="plant.dueDate">2 days ago</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Last watered</span>
+                            <span data-bind="plant.lastWatered">5 days ago</span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm mt-1">
+                            <span class="text-gray-500">Next watering</span>
+                            <span class="text-overdue" data-bind="plant.nextWatering">2 days overdue</span>
+                        </div>
+                        
+                        <div class="mt-3 flex space-x-2">
+                            <button class="flex-1 bg-user2 text-white rounded-lg py-2 text-sm font-medium">
+                                <i class="fas fa-tint mr-2"></i>Water Now
+                            </button>
+                            <button class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-gray-800 rounded-xl card-shadow overflow-hidden">
+                    <!-- Small succulent plant in a ceramic pot -->
+                    <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&h=200" 
+                         alt="Small succulent plant" 
+                         class="w-full h-32 object-cover" 
+                         data-mock-image="true" 
+                         data-implementation="Use plant photo from user upload" />
+                    
+                    <div class="p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div>
+                                <h3 class="font-medium" data-bind="plant.name">Jade Plant</h3>
+                                <div class="text-xs text-gray-500" data-bind="plant.location">Desk Corner</div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm font-medium text-complete" data-bind="plant.status">Good</div>
+                                <div class="text-xs text-gray-500" data-bind="plant.dueDate">in 4 days</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm">
+                            <span class="text-gray-500">Last watered</span>
+                            <span data-bind="plant.lastWatered">3 days ago</span>
+                        </div>
+                        
+                        <div class="flex items-center justify-between text-sm mt-1">
+                            <span class="text-gray-500">Next watering</span>
+                            <span data-bind="plant.nextWatering">in 4 days</span>
+                        </div>
+                        
+                        <div class="mt-3 flex space-x-2">
+                            <button class="flex-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-lg py-2 text-sm font-medium">
+                                <i class="fas fa-tint mr-2"></i>Water Early
+                            </button>
+                            <button class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_MAP )) -->
+            </div>
+        </div>
+        <!-- @END_COMPONENT: PlantsView -->
+    </main>
+
+    <!-- Floating Action Button -->
+    <button class="floating-btn fixed bottom-24 right-4 w-14 h-14 bg-user1 text-white rounded-full shadow-lg z-40">
+        <i class="fas fa-plus text-xl"></i>
+    </button>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-50">
+        <div class="flex">
+            <button class="tab-btn flex-1 py-3 px-2 text-center active" data-tab="dashboard">
+                <i class="fas fa-home text-lg block"></i>
+                <span class="text-xs mt-1 block">Home</span>
+            </button>
+            <button class="tab-btn flex-1 py-3 px-2 text-center" data-tab="shopping">
+                <i class="fas fa-shopping-cart text-lg block"></i>
+                <span class="text-xs mt-1 block">Shopping</span>
+            </button>
+            <button class="tab-btn flex-1 py-3 px-2 text-center" data-tab="finances">
+                <i class="fas fa-credit-card text-lg block"></i>
+                <span class="text-xs mt-1 block">Finances</span>
+            </button>
+            <button class="tab-btn flex-1 py-3 px-2 text-center" data-tab="cleaning">
+                <i class="fas fa-broom text-lg block"></i>
+                <span class="text-xs mt-1 block">Cleaning</span>
+            </button>
+            <button class="tab-btn flex-1 py-3 px-2 text-center" data-tab="plants">
+                <i class="fas fa-leaf text-lg block"></i>
+                <span class="text-xs mt-1 block">Plants</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        (function() {
+            // Tab Navigation
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const targetTab = btn.dataset.tab;
+                    
+                    // Remove active classes
+                    tabBtns.forEach(b => {
+                        b.classList.remove('active', 'text-user1');
+                        b.classList.add('text-gray-400');
+                    });
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active classes
+                    btn.classList.add('active', 'text-user1');
+                    btn.classList.remove('text-gray-400');
+                    document.getElementById(targetTab).classList.add('active');
+                });
+            });
+
+            // Theme Toggle
+            const themeToggle = document.getElementById('theme-toggle');
+            const html = document.documentElement;
+            
+            themeToggle.addEventListener('click', () => {
+                html.classList.toggle('dark');
+                // TODO: Save theme preference to localStorage
+            });
+
+            // Initialize theme from localStorage or system preference
+            if (localStorage.getItem('theme') === 'dark' || 
+                (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                html.classList.add('dark');
+            }
+
+            // TODO: Implement PWA features
+            // TODO: Add pull-to-refresh functionality
+            // TODO: Implement notification system
+            // TODO: Add swipe gestures for tab navigation
+            // TODO: Integrate PDF text extraction for shopping lists
+            // TODO: Add image upload capabilities for plants and receipts
+            // TODO: Implement local storage with cloud sync options
+            // TODO: Add form validation and error handling
+        })();
+    </script>
+</body>
+</html>

@@ -38,6 +38,7 @@ export default function Dashboard() {
     queryKey: ["/api/dashboard"],
   });
 
+
   if (isLoading) {
     return (
       <div className="p-4 space-y-6">

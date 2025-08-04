@@ -4,6 +4,7 @@ import multer from "multer";
 import { PDFExtract } from "pdf.js-extract";
 import { storage } from "./storage";
 import { insertShoppingItemSchema, insertTransactionSchema, insertActivitySchema, insertInventoryItemSchema } from "@shared/schema";
+import { setupWebSocket, broadcastUpdate, notifyRefetch } from "./websocket";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
@@ -116,6 +117,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const validatedData = insertShoppingItemSchema.parse(req.body);
       const item = await storage.createShoppingItem(validatedData);
+      
+      // Notify all clients to refetch shopping data
+      notifyRefetch(['/api/shopping-lists', '/api/shopping-items']);
+      broadcastUpdate('shopping-item-added', { item });
+      
       res.status(201).json(item);
     } catch (error) {
       res.status(400).json({ error: "Invalid data" });
@@ -141,6 +147,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!item) {
       return res.status(404).json({ error: "Item not found" });
     }
+    
+    // Notify all clients about the update
+    notifyRefetch(['/api/shopping-lists', '/api/shopping-items', '/api/dashboard']);
+    broadcastUpdate('shopping-item-updated', { item });
+    
     res.json(item);
   });
 
@@ -195,6 +206,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!room) {
       return res.status(404).json({ error: "Room not found" });
     }
+    
+    // Notify all clients about room update
+    notifyRefetch(['/api/rooms', '/api/dashboard']);
+    broadcastUpdate('room-updated', { room });
+    
     res.json(room);
   });
 
@@ -218,6 +234,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (!plant) {
       return res.status(404).json({ error: "Plant not found" });
     }
+    
+    // Notify all clients about plant update
+    notifyRefetch(['/api/plants', '/api/dashboard']);
+    broadcastUpdate('plant-updated', { plant });
+    
     res.json(plant);
   });
 
@@ -413,5 +434,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   const httpServer = createServer(app);
+  
+  // Set up WebSocket server for live updates
+  setupWebSocket(httpServer);
+  
   return httpServer;
 }

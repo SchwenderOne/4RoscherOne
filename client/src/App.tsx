@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/hooks/use-theme";
 import { MobileLayout } from "@/components/layout/mobile-layout";
 import { NotificationService } from "@/services/notification-service";
 import { ROUTES } from "@/lib/constants";
+import { useWebSocket } from "@/hooks/use-websocket";
 
 import Dashboard from "@/pages/dashboard";
 import TasksToday from "@/pages/tasks-today";
@@ -21,6 +22,9 @@ import NotFound from "@/pages/not-found";
 
 function Router() {
   const [location] = useLocation();
+  
+  // Initialize WebSocket connection for live updates
+  const { isConnected } = useWebSocket();
 
   // Initialize notification service
   useEffect(() => {

@@ -625,4 +625,16 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+import { DrizzleStorage } from "./drizzle-storage";
+import * as dotenv from "dotenv";
+
+// Load environment variables
+dotenv.config();
+
+// Use DrizzleStorage if DATABASE_URL is available, otherwise use MemStorage
+export const storage: IStorage = process.env.DATABASE_URL
+  ? new DrizzleStorage(process.env.DATABASE_URL)
+  : new MemStorage();
+
+// Log which storage is being used
+console.log(`Using ${process.env.DATABASE_URL ? 'DrizzleStorage (Supabase)' : 'MemStorage (in-memory)'} for data persistence`);
