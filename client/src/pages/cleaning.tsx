@@ -3,12 +3,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Check, Utensils, Plus } from "lucide-react";
+import { Check, Utensils, Plus, Bell } from "lucide-react";
 import { USERS } from "@/lib/constants";
 import { AddRoomModal } from "@/components/forms/add-room-modal";
 import type { Room } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { NotificationService } from "@/services/notification-service";
+import { useDevMode } from "@/hooks/use-dev-mode";
 
 interface CleaningProps {
   isAddModalOpen: boolean;
@@ -17,6 +18,7 @@ interface CleaningProps {
 
 export default function Cleaning({ isAddModalOpen, setIsAddModalOpen }: CleaningProps) {
   const queryClient = useQueryClient();
+  const { isDevMode } = useDevMode();
 
   const { data: rooms = [], isLoading } = useQuery<Room[]>({
     queryKey: ["/api/rooms"],
@@ -103,6 +105,19 @@ export default function Cleaning({ isAddModalOpen, setIsAddModalOpen }: Cleaning
     }
   };
 
+  const sendTestNotification = (type: 'reminder' | 'overdue') => {
+    const notificationService = NotificationService.getInstance();
+    if (type === 'reminder') {
+      notificationService.sendNotification(
+        NotificationService.createCleaningReminder("Kitchen", 0)
+      );
+    } else {
+      notificationService.sendNotification(
+        NotificationService.createCleaningReminder("Bathroom", 2)
+      );
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="p-4 space-y-4">
@@ -125,6 +140,34 @@ export default function Cleaning({ isAddModalOpen, setIsAddModalOpen }: Cleaning
           Add Room
         </Button>
       </div>
+
+      {/* Dev Mode Test Buttons */}
+      {isDevMode && (
+        <Card className="border-dashed border-2 border-muted-foreground/25">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Bell className="h-4 w-4" />
+              <span className="text-sm font-medium">Test Notifications</span>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendTestNotification('reminder')}
+              >
+                Test Cleaning Reminder
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => sendTestNotification('overdue')}
+              >
+                Test Overdue Alert
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Room Cards */}
       <div className="space-y-4">

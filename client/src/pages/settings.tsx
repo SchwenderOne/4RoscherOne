@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { ArrowLeft, Bell, Moon, Sun, User } from "lucide-react";
+import { ArrowLeft, Bell, Moon, Sun, User, Code2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -8,11 +8,13 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { NotificationSetup } from "@/components/notifications/notification-setup";
 import { useTheme } from "@/hooks/use-theme";
+import { useDevMode } from "@/hooks/use-dev-mode";
 import { USERS } from "@/lib/constants";
 
 export default function Settings() {
   const [, setLocation] = useLocation();
   const { theme, setTheme } = useTheme();
+  const { isDevMode, toggleDevMode } = useDevMode();
   const [currentUserId] = useState(USERS.ALEX.id); // TODO: Get from auth context
 
   const currentUser = currentUserId === USERS.ALEX.id ? USERS.ALEX : USERS.MAYA;
@@ -87,6 +89,37 @@ export default function Settings() {
 
         {/* Notification Settings */}
         <NotificationSetup />
+
+        {/* Developer Settings */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Code2 className="w-5 h-5" />
+              Developer
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-medium">Dev Mode</div>
+                <div className="text-sm text-muted-foreground">
+                  Show test notification buttons on each screen
+                </div>
+              </div>
+              <Switch
+                checked={isDevMode}
+                onCheckedChange={toggleDevMode}
+              />
+            </div>
+            {isDevMode && (
+              <div className="p-3 bg-muted rounded-lg">
+                <div className="text-sm text-muted-foreground">
+                  Developer mode is active. Test notification buttons will appear on cleaning and plant pages.
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* App Information */}
         <Card>

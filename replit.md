@@ -43,6 +43,13 @@ RoomMate is a comprehensive shared apartment management application designed for
 - Recent activity feed
 - Quick navigation to action items
 
+### 🔔 Push Notifications
+- **Service Worker Implementation**: Comprehensive service worker with caching and notification support
+- **Notification Permissions**: Settings page with permission management and test functionality
+- **Real-time Alerts**: Notifications for cleaning completion, plant watering, and expense additions
+- **PWA Manifest**: Full Progressive Web App configuration with app icons
+- **Developer Mode**: Toggle to show test notification buttons on cleaning and plant pages
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
