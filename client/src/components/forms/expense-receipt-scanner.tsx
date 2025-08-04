@@ -1,9 +1,10 @@
 import { useState, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
 import Tesseract from "tesseract.js";
+import { USERS } from "@/lib/constants";
 
 import {
   Dialog,
@@ -25,7 +26,6 @@ import { Progress } from "@/components/ui/progress";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Upload, FileText, Camera, CreditCard } from "lucide-react";
-import { USERS } from "@/lib/constants";
 
 const receiptScannerSchema = z.object({
   receipt: z.any().optional(),
@@ -404,15 +404,15 @@ export function ExpenseReceiptScanner({
                   </div>
                 </div>
 
-                <div className="bg-white border-2 border-gray-200 rounded-lg p-6 text-center shadow-sm">
-                  <h3 className="font-semibold text-lg mb-2">
+                <div className="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-600 rounded-lg p-6 text-center shadow-sm">
+                  <h3 className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">
                     {extractedItems[currentItemIndex].name}
                   </h3>
-                  <p className="text-2xl font-bold text-green-600 mb-4">
+                  <p className="text-2xl font-bold text-green-600 dark:text-green-400 mb-4">
                     €{extractedItems[currentItemIndex].price.toFixed(2)}
                   </p>
                   
-                  <div className="text-sm text-gray-600 mb-6">
+                  <div className="text-sm text-gray-600 dark:text-gray-300 mb-6">
                     Who should pay for this item?
                   </div>
 
@@ -457,6 +457,9 @@ export function ExpenseReceiptScanner({
                     const roommateTotal = roommateItems.reduce((sum, item) => sum + item.price, 0);
                     const sharedTotal = sharedItems.reduce((sum, item) => sum + item.price, 0);
                     const sharedPerPerson = sharedTotal / 2;
+                    
+                    const getCurrentUser = () => currentUserId === USERS.ALEX.id ? USERS.ALEX : USERS.MAYA;
+                    const getRoommate = () => currentUserId === USERS.ALEX.id ? USERS.MAYA : USERS.ALEX;
 
                     return (
                       <>
@@ -475,13 +478,71 @@ export function ExpenseReceiptScanner({
                         </div>
 
                         <Button 
-                          onClick={() => {
-                            // TODO: Create transactions
-                            toast({
-                              title: "Expenses added!",
-                              description: "All receipt items have been added to your finances.",
-                            });
-                            handleClose();
+                          onClick={async () => {
+                            try {
+                              // Create individual transactions for each category
+                              const createTransactionMutation = async (description: string, amount: number, paidBy: string, splitBetween: string[]) => {
+                                const response = await fetch('/api/transactions', {
+                                  method: 'POST',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({
+                                    description,
+                                    amount: amount.toString(),
+                                    paidById: paidBy,
+                                    splitBetween
+                                  })
+                                });
+                                return response.json();
+                              };
+
+                              const currentUser = getCurrentUser();
+                              const roommate = getRoommate();
+
+                              // Create transactions for personal items
+                              if (myTotal > 0) {
+                                await createTransactionMutation(
+                                  `Receipt items (${myItems.map(i => i.name).join(', ')})`,
+                                  myTotal,
+                                  currentUser.id,
+                                  [currentUser.id]
+                                );
+                              }
+
+                              if (roommateTotal > 0) {
+                                await createTransactionMutation(
+                                  `Receipt items (${roommateItems.map(i => i.name).join(', ')})`,
+                                  roommateTotal,
+                                  roommate.id,
+                                  [roommate.id]
+                                );
+                              }
+
+                              // Create transaction for shared items
+                              if (sharedTotal > 0) {
+                                await createTransactionMutation(
+                                  `Shared receipt items (${sharedItems.map(i => i.name).join(', ')})`,
+                                  sharedTotal,
+                                  currentUser.id, // Current user pays upfront
+                                  [currentUser.id, roommate.id] // Split between both
+                                );
+                              }
+
+                              // Invalidate transaction cache to refresh the list
+                              queryClient.invalidateQueries({ queryKey: ['/api/transactions'] });
+
+                              toast({
+                                title: "Expenses added!",
+                                description: "All receipt items have been added to your finances.",
+                              });
+                              handleClose();
+                            } catch (error) {
+                              console.error('Error creating transactions:', error);
+                              toast({
+                                title: "Error",
+                                description: "Failed to add expenses. Please try again.",
+                                variant: "destructive",
+                              });
+                            }
                           }}
                           className="w-full"
                         >

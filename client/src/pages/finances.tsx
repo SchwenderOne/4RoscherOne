@@ -12,10 +12,19 @@ import type { Transaction } from "@shared/schema";
 interface FinancesProps {
   isAddModalOpen: boolean;
   setIsAddModalOpen: (open: boolean) => void;
+  isReceiptScannerOpen?: boolean;
+  setIsReceiptScannerOpen?: (open: boolean) => void;
 }
 
-export default function Finances({ isAddModalOpen, setIsAddModalOpen }: FinancesProps) {
-  const [isReceiptScannerOpen, setIsReceiptScannerOpen] = useState(false);
+export default function Finances({ 
+  isAddModalOpen, 
+  setIsAddModalOpen,
+  isReceiptScannerOpen: propIsReceiptScannerOpen,
+  setIsReceiptScannerOpen: propSetIsReceiptScannerOpen
+}: FinancesProps) {
+  const [localReceiptScannerOpen, setLocalReceiptScannerOpen] = useState(false);
+  const isReceiptScannerOpen = propIsReceiptScannerOpen ?? localReceiptScannerOpen;
+  const setIsReceiptScannerOpen = propSetIsReceiptScannerOpen ?? setLocalReceiptScannerOpen;
   const [currentUserId] = useState(USERS.ALEX.id); // TODO: Get from auth context
   
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
@@ -143,18 +152,7 @@ export default function Finances({ isAddModalOpen, setIsAddModalOpen }: Finances
       {/* Recent Transactions */}
       <Card>
         <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Recent Transactions</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsReceiptScannerOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <ScanLine className="h-4 w-4" />
-              Scan Receipt
-            </Button>
-          </div>
+          <CardTitle className="text-base">Recent Transactions</CardTitle>
         </CardHeader>
         
         <CardContent>

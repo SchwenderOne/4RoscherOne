@@ -25,6 +25,7 @@ function Router() {
     finances: false,
     cleaning: false,
     plants: false,
+    receiptScanner: false,
   });
 
   const handleFabClick = () => {
@@ -44,10 +45,20 @@ function Router() {
     }
   };
 
+  const handleScanClick = () => {
+    if (location === ROUTES.FINANCES) {
+      setModals(prev => ({ ...prev, receiptScanner: true }));
+    }
+  };
+
   const shouldShowFab = [ROUTES.SHOPPING, ROUTES.FINANCES, ROUTES.CLEANING, ROUTES.PLANTS].includes(location as typeof ROUTES[keyof typeof ROUTES]);
 
   return (
-    <MobileLayout onFabClick={shouldShowFab ? handleFabClick : undefined}>
+    <MobileLayout 
+      onFabClick={shouldShowFab ? handleFabClick : undefined}
+      onScanClick={shouldShowFab ? handleScanClick : undefined}
+      showScanOption={location === ROUTES.FINANCES}
+    >
       <Switch>
         <Route path={ROUTES.DASHBOARD} component={Dashboard} />
         <Route path="/tasks-today" component={TasksToday} />
@@ -55,7 +66,12 @@ function Router() {
           {() => <Shopping isAddModalOpen={modals.shopping} setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, shopping: open }))} />}
         </Route>
         <Route path={ROUTES.FINANCES}>
-          {() => <Finances isAddModalOpen={modals.finances} setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, finances: open }))} />}
+          {() => <Finances 
+            isAddModalOpen={modals.finances} 
+            setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, finances: open }))}
+            isReceiptScannerOpen={modals.receiptScanner}
+            setIsReceiptScannerOpen={(open) => setModals(prev => ({ ...prev, receiptScanner: open }))}
+          />}
         </Route>
         <Route path={ROUTES.CLEANING}>
           {() => <Cleaning isAddModalOpen={modals.cleaning} setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, cleaning: open }))} />}
