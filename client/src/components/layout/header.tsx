@@ -22,7 +22,7 @@ export function Header() {
           <div className="w-8 h-8 bg-gradient-to-br from-[hsl(207,90%,54%)] to-[hsl(142,71%,45%)] rounded-lg flex items-center justify-center">
             <Home className="text-white text-sm" size={16} />
           </div>
-          <h1 className="text-xl font-medium">RoomMate</h1>
+          <h1 className="text-xl font-medium">4Roscher</h1>
         </div>
         
         <div className="flex items-center space-x-4">

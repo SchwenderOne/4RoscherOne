@@ -1,7 +1,7 @@
 {
-  "name": "RoomMate App",
-  "short_name": "RoomMate",
-  "description": "Coordinate shared apartment activities with your roommate",
+  "name": "4Roscher",
+  "short_name": "4Roscher",
+  "description": "Household management app for coordinating shared activities",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
