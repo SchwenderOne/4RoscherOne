@@ -7,6 +7,7 @@ import { Plus, ShoppingCart, ScanLine } from "lucide-react";
 import { USERS } from "@/lib/constants";
 import { AddExpenseModal } from "@/components/forms/add-expense-modal";
 import { ExpenseReceiptScanner } from "@/components/forms/expense-receipt-scanner";
+import { NotificationService } from "@/services/notification-service";
 import type { Transaction } from "@shared/schema";
 
 interface FinancesProps {

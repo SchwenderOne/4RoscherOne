@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/hooks/use-theme";
 import { MobileLayout } from "@/components/layout/mobile-layout";
+import { NotificationService } from "@/services/notification-service";
 import { ROUTES } from "@/lib/constants";
 
 import Dashboard from "@/pages/dashboard";
@@ -14,10 +15,20 @@ import Shopping from "@/pages/shopping";
 import Finances from "@/pages/finances";
 import Cleaning from "@/pages/cleaning";
 import Plants from "@/pages/plants";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   const [location] = useLocation();
+
+  // Initialize notification service
+  useEffect(() => {
+    const initNotifications = async () => {
+      const notificationService = NotificationService.getInstance();
+      await notificationService.initialize();
+    };
+    initNotifications();
+  }, []);
   
   // State to handle modal visibility for each page
   const [modals, setModals] = useState({
@@ -79,6 +90,7 @@ function Router() {
         <Route path={ROUTES.PLANTS}>
           {() => <Plants isAddModalOpen={modals.plants} setIsAddModalOpen={(open) => setModals(prev => ({ ...prev, plants: open }))} />}
         </Route>
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </MobileLayout>

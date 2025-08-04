@@ -1,12 +1,14 @@
-import { Moon, Sun, Home } from "lucide-react";
+import { Moon, Sun, Home, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/hooks/use-theme";
 import { USERS } from "@/lib/constants";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 export function Header() {
   const { theme, toggleTheme } = useTheme();
   const [currentUser, setCurrentUser] = useState<'alex' | 'maya'>('alex');
+  const [, setLocation] = useLocation();
 
   const handleUserSwitch = (user: 'alex' | 'maya') => {
     setCurrentUser(user);
@@ -51,6 +53,16 @@ export function Header() {
               {USERS.MAYA.avatar}
             </Button>
           </div>
+          
+          {/* Settings Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLocation("/settings")}
+            className="rounded-lg"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
           
           {/* Theme Toggle */}
           <Button

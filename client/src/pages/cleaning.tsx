@@ -8,6 +8,7 @@ import { USERS } from "@/lib/constants";
 import { AddRoomModal } from "@/components/forms/add-room-modal";
 import type { Room } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { NotificationService } from "@/services/notification-service";
 
 interface CleaningProps {
   isAddModalOpen: boolean;
@@ -29,9 +30,21 @@ export default function Cleaning({ isAddModalOpen, setIsAddModalOpen }: Cleaning
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, roomId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/rooms"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
+      
+      // Send notification for completed cleaning
+      const room = rooms.find(r => r.id === roomId);
+      if (room && Notification.permission === 'granted') {
+        const notificationService = NotificationService.getInstance();
+        notificationService.sendNotification({
+          title: "🧽 Room Cleaned!",
+          body: `${room.name} has been marked as clean`,
+          tag: `cleaning-complete-${room.name}`,
+          data: { type: 'cleaning-complete', roomName: room.name }
+        });
+      }
     },
   });
 

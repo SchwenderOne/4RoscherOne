@@ -8,6 +8,7 @@ import { USERS } from "@/lib/constants";
 import { AddPlantModal } from "@/components/forms/add-plant-modal";
 import type { Plant } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { NotificationService } from "@/services/notification-service";
 
 interface PlantsProps {
   isAddModalOpen: boolean;
@@ -29,9 +30,21 @@ export default function Plants({ isAddModalOpen, setIsAddModalOpen }: PlantsProp
       });
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data, plantId) => {
       queryClient.invalidateQueries({ queryKey: ["/api/plants"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard"] });
+      
+      // Send notification for plant watering
+      const plant = plants.find(p => p.id === plantId);
+      if (plant && Notification.permission === 'granted') {
+        const notificationService = NotificationService.getInstance();
+        notificationService.sendNotification({
+          title: "🌱 Plant Watered!",
+          body: `${plant.name} has been watered`,
+          tag: `plant-watered-${plant.name}`,
+          data: { type: 'plant-watered', plantName: plant.name }
+        });
+      }
     },
   });
 
