@@ -1,11 +1,14 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus, ShoppingCart } from "lucide-react";
 import { USERS } from "@/lib/constants";
+import { AddExpenseModal } from "@/components/forms/add-expense-modal";
 import type { Transaction } from "@shared/schema";
 
 export default function Finances() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const { data: transactions = [], isLoading } = useQuery<Transaction[]>({
     queryKey: ["/api/transactions"],
   });
@@ -85,7 +88,10 @@ export default function Finances() {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">Finances</h2>
-        <Button className="rounded-xl">
+        <Button 
+          className="rounded-xl"
+          onClick={() => setIsAddModalOpen(true)}
+        >
           <Plus className="mr-2" size={16} />
           Add Expense
         </Button>
@@ -175,6 +181,12 @@ export default function Finances() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Expense Modal */}
+      <AddExpenseModal
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+      />
     </div>
   );
 }

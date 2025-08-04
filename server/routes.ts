@@ -38,6 +38,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/shopping-lists/:listId/items", async (req, res) => {
+    try {
+      const validatedData = insertShoppingItemSchema.parse({
+        ...req.body,
+        shoppingListId: req.params.listId
+      });
+      const item = await storage.createShoppingItem(validatedData);
+      res.status(201).json(item);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid data" });
+    }
+  });
+
   app.patch("/api/shopping-items/:id", async (req, res) => {
     const item = await storage.updateShoppingItem(req.params.id, req.body);
     if (!item) {
@@ -82,6 +95,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(rooms);
   });
 
+  app.post("/api/rooms", async (req, res) => {
+    try {
+      const room = await storage.createRoom(req.body);
+      res.status(201).json(room);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid data" });
+    }
+  });
+
   app.patch("/api/rooms/:id", async (req, res) => {
     const room = await storage.updateRoom(req.params.id, req.body);
     if (!room) {
@@ -94,6 +116,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/plants", async (req, res) => {
     const plants = await storage.getPlants();
     res.json(plants);
+  });
+
+  app.post("/api/plants", async (req, res) => {
+    try {
+      const plant = await storage.createPlant(req.body);
+      res.status(201).json(plant);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid data" });
+    }
   });
 
   app.patch("/api/plants/:id", async (req, res) => {

@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Check, Utensils } from "lucide-react";
+import { Check, Utensils, Plus } from "lucide-react";
 import { USERS } from "@/lib/constants";
+import { AddRoomModal } from "@/components/forms/add-room-modal";
 import type { Room } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Cleaning() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: rooms = [], isLoading } = useQuery<Room[]>({
@@ -97,9 +100,12 @@ export default function Cleaning() {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">Cleaning Schedule</h2>
-        <Button className="rounded-xl">
-          <Check className="mr-2" size={16} />
-          Mark Done
+        <Button 
+          className="rounded-xl"
+          onClick={() => setIsAddModalOpen(true)}
+        >
+          <Plus className="mr-2" size={16} />
+          Add Room
         </Button>
       </div>
 
@@ -171,6 +177,12 @@ export default function Cleaning() {
           );
         })}
       </div>
+
+      {/* Add Room Modal */}
+      <AddRoomModal
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+      />
     </div>
   );
 }

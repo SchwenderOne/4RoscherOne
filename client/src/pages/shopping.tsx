@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,11 +8,13 @@ import { Plus } from "lucide-react";
 import { USERS } from "@/lib/constants";
 import type { ShoppingItem, LongTermPurchase } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import { AddShoppingItemModal } from "@/components/forms/add-shopping-item-modal";
 
 export default function Shopping() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: activeList } = useQuery({
+  const { data: activeList } = useQuery<{ id: string; name: string }>({
     queryKey: ["/api/shopping-lists/active"],
   });
 
@@ -65,7 +68,10 @@ export default function Shopping() {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">Shopping Lists</h2>
-        <Button className="rounded-xl">
+        <Button 
+          className="rounded-xl"
+          onClick={() => setIsAddModalOpen(true)}
+        >
           <Plus className="mr-2" size={16} />
           Add Item
         </Button>
@@ -172,6 +178,15 @@ export default function Shopping() {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Item Modal */}
+      {activeList && (
+        <AddShoppingItemModal
+          isOpen={isAddModalOpen}
+          onOpenChange={setIsAddModalOpen}
+          listId={activeList.id}
+        />
+      )}
     </div>
   );
 }

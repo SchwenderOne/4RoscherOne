@@ -1,13 +1,16 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Droplets, Plus, Edit } from "lucide-react";
 import { USERS } from "@/lib/constants";
+import { AddPlantModal } from "@/components/forms/add-plant-modal";
 import type { Plant } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function Plants() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: plants = [], isLoading } = useQuery<Plant[]>({
@@ -100,7 +103,11 @@ export default function Plants() {
     <div className="p-4 space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-medium">Plant Care</h2>
-        <Button className="rounded-xl" style={{ backgroundColor: USERS.MAYA.color }}>
+        <Button 
+          className="rounded-xl" 
+          style={{ backgroundColor: USERS.MAYA.color }}
+          onClick={() => setIsAddModalOpen(true)}
+        >
           <Plus className="mr-2" size={16} />
           Add Plant
         </Button>
@@ -184,6 +191,12 @@ export default function Plants() {
           })
         )}
       </div>
+
+      {/* Add Plant Modal */}
+      <AddPlantModal
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+      />
     </div>
   );
 }
