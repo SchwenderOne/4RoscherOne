@@ -42,15 +42,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       });
 
-      // Combine all text content
+      // Combine all text content with better formatting
       let fullText = '';
       if (pdfData && pdfData.pages && pdfData.pages.length > 0) {
         for (const page of pdfData.pages) {
           if (page.content) {
-            for (const item of page.content) {
-              if (item.str) {
-                fullText += item.str + '\n';
+            // Sort items by Y position to maintain reading order
+            const sortedContent = page.content.sort((a: any, b: any) => b.y - a.y);
+            
+            let currentLine = '';
+            let lastY = -1;
+            
+            for (const item of sortedContent) {
+              if (item.str && item.str.trim()) {
+                // If Y position changed significantly, start a new line
+                if (lastY !== -1 && Math.abs(item.y - lastY) > 2) {
+                  if (currentLine.trim()) {
+                    fullText += currentLine.trim() + '\n';
+                  }
+                  currentLine = item.str;
+                } else {
+                  // Add to current line with space if needed
+                  currentLine += (currentLine.trim() ? ' ' : '') + item.str;
+                }
+                lastY = item.y;
               }
+            }
+            
+            // Add the last line
+            if (currentLine.trim()) {
+              fullText += currentLine.trim() + '\n';
             }
           }
         }
@@ -60,6 +81,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "No text content found in PDF" });
       }
 
+      console.log("Extracted PDF text:", fullText);
       res.json({ text: fullText });
     } catch (error) {
       console.error("PDF processing error:", error);

@@ -67,26 +67,75 @@ export function ReceiptScannerModal({
 
   // Parse German receipt text to extract items
   const parseReceiptText = (text: string): ReceiptItem[] => {
-    const lines = text.split('\n');
+    const lines = text.split('\n').map(line => line.trim());
     const items: ReceiptItem[] = [];
     
+    // Multiple patterns for REWE receipts
     for (const line of lines) {
-      // Look for lines with product names and prices
-      // REWE format: "PRODUCT NAME                  PRICE B/A"
-      const match = line.match(/^([A-Z\s\.\-]+?)\s+(\d+,\d{2})\s+[AB]\s*$/);
+      // Skip empty lines and headers
+      if (!line || line.includes('REWE') || line.includes('Kurfürstendamm') || 
+          line.includes('SUMME') || line.includes('EUR') || line.includes('Datum') ||
+          line.includes('Terminal') || line.includes('TSE')) {
+        continue;
+      }
+      
+      // Pattern 1: "PRODUCT NAME                  PRICE B"
+      let match = line.match(/^([A-ZÄÖÜa-zäöü\s\.\-]+?)\s+(\d+,\d{2})\s+[AB]\s*$/);
+      
+      // Pattern 2: More flexible - look for any line with a price at the end
+      if (!match) {
+        match = line.match(/^([A-ZÄÖÜa-zäöü\s\.\-]{3,})\s+(\d+,\d{2})(?:\s+[AB])?\s*$/);
+      }
+      
+      // Pattern 3: Handle lines where price might be separated
+      if (!match) {
+        match = line.match(/^([A-ZÄÖÜa-zäöü\s\.\-]{3,})\s+(\d+,\d{2})$/);
+      }
+      
       if (match) {
         const [, name, priceStr] = match;
         const cleanName = name.trim();
         // Convert German decimal format (1,29) to number (1.29)
         const price = parseFloat(priceStr.replace(',', '.'));
         
-        // Skip certain items like PFAND (bottle deposit)
-        if (!cleanName.includes('PFAND') && cleanName.length > 2 && price > 0) {
+        // Skip certain items like PFAND (bottle deposit) and very short names
+        if (!cleanName.includes('PFAND') && 
+            !cleanName.includes('EURO') &&
+            cleanName.length > 2 && 
+            price > 0 &&
+            // Skip if it looks like a header or footer
+            !cleanName.includes('STEUER') &&
+            !cleanName.includes('NETTO')) {
+          
           items.push({
             name: cleanName,
             price,
             selected: true
           });
+        }
+      }
+    }
+    
+    // If we still have no items, try a more aggressive approach
+    if (items.length === 0) {
+      console.log("No items found with strict parsing, trying looser patterns...");
+      console.log("Receipt text:", text);
+      
+      for (const line of lines) {
+        // Very loose pattern - any line with letters and a price-like number
+        const looseMatch = line.match(/([A-ZÄÖÜa-zäöü\s]{3,})\s*(\d+,\d{2})/);
+        if (looseMatch && !line.includes('SUMME') && !line.includes('REWE')) {
+          const [, name, priceStr] = looseMatch;
+          const cleanName = name.trim();
+          const price = parseFloat(priceStr.replace(',', '.'));
+          
+          if (cleanName.length > 2 && price > 0) {
+            items.push({
+              name: cleanName,
+              price,
+              selected: true
+            });
+          }
         }
       }
     }
