@@ -8,6 +8,11 @@ import { setupWebSocket, broadcastUpdate, notifyRefetch } from "./websocket";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   
+  // Health check endpoint for Railway
+  app.get("/api/health", (req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+  
   // Set up multer for file uploads
   const upload = multer({ 
     storage: multer.memoryStorage(),
